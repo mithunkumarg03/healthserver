@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import cirq
+import tensorflow
 from transformers import pipeline
 
 # Load LLM (DistilGPT2) for generating the report
