@@ -3,8 +3,7 @@ import numpy as np
 import cirq
 
 
-# Load LLM (DistilGPT2) for generating the report
-llm = pipeline("text-generation", model="distilgpt2")
+
 
 # Step 1: Classify heart disease risk
 def classify_heart_disease(row):
