@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import cirq
-import tensorflow
-from transformers import pipeline
+
 
 # Load LLM (DistilGPT2) for generating the report
 llm = pipeline("text-generation", model="distilgpt2")
@@ -24,14 +23,10 @@ def classify_heart_disease(row):
 # Step 2: Generate health report using LLM
 def generate_report(risk_factors):
     if not risk_factors:
-        prompt = "Generate a short, friendly health report stating the patient is at low risk of heart disease."
+        return "The patient is at low risk of heart disease. Maintain a healthy lifestyle."
     else:
         reasons = ', '.join(risk_factors)
-        prompt = f"Generate a medical report for a patient who is at high risk of heart disease due to {reasons}. Recommend immediate medical attention."
-    
-    response = llm(prompt, max_length=100, do_sample=True, temperature=0.7)
-    return response[0]['generated_text']
-
+        return f"The patient is at high risk of heart disease due to {reasons}. Immediate medical attention is advised."
 # Step 3: Quantum Optimization Simulation (Cirq)
 def simulate_quantum_decision():
     qubits = [cirq.LineQubit(i) for i in range(3)]
