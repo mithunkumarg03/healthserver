@@ -60,7 +60,7 @@ def process_xls(file_path):
     quantum_info = simulate_quantum_decision()
 
     return {
-        "status": status,
+        "risk": status,
         "risk_factors": risk_factors,
         "report": report,
         "quantum": quantum_info
