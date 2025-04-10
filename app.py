@@ -20,6 +20,9 @@ def predict():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filepath)
         result = process_xls(filepath)
+
+        if os.path.exists(filepath):
+            os.remove(filepath)
         return jsonify(result), 200
 
 if __name__ == "__main__":
