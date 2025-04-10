@@ -24,6 +24,7 @@ def predict():
         file.save(filepath)
 
         result = process_xls(filepath)
+        print(result)
 
         os.remove(filepath)
         return jsonify(result), 200
