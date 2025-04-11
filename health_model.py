@@ -5,20 +5,27 @@ import requests
 # Step 1: Classify heart disease risk
 def classify_heart_disease(row):
     risk_factors = []
-    values = {}
-    if row['heart rate'] > 100:
+
+    # Always collect all relevant values
+    values = {
+        "Heart Rate": row.get('heart rate', "N/A"),
+        "Blood Pressure": row.get('blood pressure', "N/A"),
+        "Stress Level": row.get('stress level', "N/A")
+    }
+
+    # Check for abnormalities
+    if isinstance(values["Heart Rate"], (int, float)) and values["Heart Rate"] > 100:
         risk_factors.append("Heart Rate")
-        values['Heart Rate'] = row['heart rate']
-    if row['blood pressure'] > 140:
+    if isinstance(values["Blood Pressure"], (int, float)) and values["Blood Pressure"] > 140:
         risk_factors.append("Blood Pressure")
-        values['Blood Pressure'] = row['blood pressure']
-    if row['stress level'] > 6:
+    if isinstance(values["Stress Level"], (int, float)) and values["Stress Level"] > 6:
         risk_factors.append("Stress Level")
-        values['Stress Level'] = row['stress level']
+
     if risk_factors:
         return "High Risk", risk_factors, values
     else:
         return "Low Risk", [], values
+
 
 # Step 2: Generate detailed medical report using Hugging Face API
 def generate_report(risk_factors, values):
