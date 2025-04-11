@@ -46,7 +46,7 @@ def generate_report(risk_factors, values):
     if "Heart Rate" in risk_factors:
         hr = values["Heart Rate"]
         report += (
-            f"🫀 **Heart Rate Alert**\n"
+            f"🫀Heart Rate Alert\n"
             f"- Recorded Value: {hr} bpm\n"
             "- Interpretation: Tachycardia (elevated heart rate)\n"
             "- Possible Causes: Stress, arrhythmia, dehydration, thyroid issues\n"
@@ -57,7 +57,7 @@ def generate_report(risk_factors, values):
     if "Blood Pressure" in risk_factors:
         bp = values["Blood Pressure"]
         report += (
-            f"🩸 **Blood Pressure Alert**\n"
+            f"🩸Blood Pressure Alert\n"
             f"- Recorded Value: {bp} mmHg\n"
             "- Interpretation: Stage 2 Hypertension\n"
             "- Risks: Stroke, heart attack, kidney damage, vision loss\n"
@@ -68,7 +68,7 @@ def generate_report(risk_factors, values):
     if "Stress Level" in risk_factors:
         stress = values["Stress Level"]
         report += (
-            f"😥 **Stress Level Alert**\n"
+            f"😥Stress Level Alert\n"
             f"- Recorded Value: {stress}/10\n"
             "- Interpretation: Elevated psychological stress\n"
             "- Effects: Elevated heart rate, hypertension, sleep disorders\n"
@@ -78,7 +78,7 @@ def generate_report(risk_factors, values):
 
     report += (
         "----------------------------------------\n"
-        "🧾 **Final Recommendation**\n"
+        "🧾Final Recommendation\n"
         "- Immediate follow-up with a cardiologist and mental health professional\n"
         "- Monitor vitals regularly\n"
         "- Adopt cardiac-friendly lifestyle habits\n"
