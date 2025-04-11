@@ -8,16 +8,17 @@ import cirq
 # Step 1: Classify heart disease risk
 def classify_heart_disease(row):
     risk_factors = []
-    if row['Heart Rate'] > 100:
+    if row['heart rate'] > 100:
         risk_factors.append("Heart Rate")
-    if row['Blood Pressure'] > 140:
+    if row['blood pressure'] > 140:
         risk_factors.append("Blood Pressure")
-    if row['Stress Level'] > 6:
+    if row['stress level'] > 6:
         risk_factors.append("Stress Level")
     if risk_factors:
         return "High Risk", risk_factors
     else:
         return "Low Risk", []
+
 
 # Step 2: Generate health report using LLM
 def generate_report(risk_factors):
