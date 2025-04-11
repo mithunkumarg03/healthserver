@@ -52,10 +52,22 @@ def simulate_quantum_decision():
 # Step 4: Full Process Function
 def process_xls(file_path):
     df = pd.read_excel(file_path)
+
+    # Clean column names: strip spaces and convert to lowercase
+    df.columns = df.columns.str.strip().str.lower()
+
+    # Drop 'patient id' if it exists (already lowercase now)
     df = df.drop(columns=['patient id'], errors='ignore')
 
     row = df.iloc[0]  # Only first record
-    status, risk_factors = classify_heart_disease(row)
+
+    # Adjust keys to match lowercased column names
+    status, risk_factors = classify_heart_disease({
+        'heart rate': row['heart rate'],
+        'blood pressure': row['blood pressure'],
+        'stress level': row['stress level']
+    })
+    
     report = generate_report(risk_factors)
     quantum_info = simulate_quantum_decision()
 
@@ -65,3 +77,4 @@ def process_xls(file_path):
         "report": report,
         "quantum": quantum_info
     }
+
