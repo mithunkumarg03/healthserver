@@ -48,20 +48,7 @@ def generate_report(risk_factors, values):
     except Exception as e:
         pass  # If API fails, fallback below
 
-    # ---- Fallback: Manual dynamic long explanation ----
-    explanation = ["The patient's clinical assessment reveals the presence of several key physiological parameters exceeding normal thresholds, indicating an elevated risk for cardiovascular disorders. Below is an in-depth analysis:"]
-
-    for param, val in values.items():
-        if param == "Heart Rate":
-            explanation.append(f"\n**Heart Rate ({val} bpm):** A heart rate exceeding 100 beats per minute is considered tachycardia. Persistent tachycardia can reduce the efficiency of the heart, causing strain on myocardial tissue. This condition can lead to reduced oxygen delivery and increase the likelihood of arrhythmias, heart failure, or even cardiac arrest.")
-        elif param == "Blood Pressure":
-            explanation.append(f"\n**Blood Pressure ({val} mmHg):** Hypertension, defined as blood pressure greater than 140 mmHg systolic, is a leading contributor to heart attacks and strokes. It causes progressive arterial damage and promotes left ventricular hypertrophy, making the heart less efficient over time.")
-        elif param == "Stress Level":
-            explanation.append(f"\n**Stress Level ({val}/10):** Chronic stress contributes to elevated cortisol levels, vasoconstriction, and sympathetic overactivation. This exacerbates existing conditions such as hypertension and can trigger inflammatory processes that damage endothelial function, accelerating plaque formation in arteries.")
-
-    explanation.append("\n**Conclusion and Recommendations:**\nBased on the combination of these parameters, the patient is classified as HIGH RISK for cardiovascular events. It is strongly advised to schedule a comprehensive cardiac evaluation including ECG, echocardiography, and blood lipid profiling. The patient should immediately adopt lifestyle changes, including reducing sodium intake, engaging in daily aerobic exercise, stress management (e.g., meditation, therapy), and pharmacological interventions under clinical supervision.")
-
-    return "\n".join(explanation)
+    
 
 # Step 3: Quantum simulation for symbolic decision (not used for logic but visual feedback)
 def simulate_quantum_decision():
