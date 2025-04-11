@@ -1,10 +1,22 @@
 from flask import Flask, request, jsonify
 import os
+import numpy as np
 from health_model import process_xls
 
 app = Flask(__name__)
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def make_serializable(obj):
+    if isinstance(obj, (np.integer, np.int64, np.int32)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float64, np.float32)):
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {k: make_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [make_serializable(v) for v in obj]
+    return obj
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -21,15 +33,14 @@ def predict():
 
     try:
         result = process_xls(filepath)
+        result = make_serializable(result)  # 🔧 Ensure it's JSON serializable
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
-        # Safely try to remove only if it exists
         if os.path.exists(filepath):
             os.remove(filepath)
 
     return jsonify(result)
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
