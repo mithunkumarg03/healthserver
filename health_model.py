@@ -103,16 +103,31 @@ def simulate_quantum_decision():
     }
 
 # Step 4: Create Risk Table in HTML format
-def create_risk_table(values):
-    if not values:
-        return "<p>No abnormal health parameters detected.</p>"
+def create_risk_table(all_values):
+    if not all_values:
+        return "<p>No health data provided.</p>"
     
     table = "<table border='1' style='border-collapse:collapse; padding:8px;'>"
-    table += "<tr><th>Parameter</th><th>Value</th></tr>"
-    for k, v in values.items():
-        table += f"<tr><td>{k}</td><td>{v}</td></tr>"
+    table += "<tr><th>Parameter</th><th>Value</th><th>Status</th></tr>"
+    
+    for k, v in all_values.items():
+        status = "Abnormal" if k in detect_abnormal_keys(all_values) else "Normal"
+        color = "red" if status == "Abnormal" else "green"
+        table += f"<tr><td>{k}</td><td>{v}</td><td style='color:{color};'>{status}</td></tr>"
+    
     table += "</table>"
     return table
+
+def detect_abnormal_keys(values):
+    abnormal = []
+    if "Heart Rate" in values and values["Heart Rate"] > 100:
+        abnormal.append("Heart Rate")
+    if "Blood Pressure" in values and values["Blood Pressure"] > 140:
+        abnormal.append("Blood Pressure")
+    if "Stress Level" in values and values["Stress Level"] > 6:
+        abnormal.append("Stress Level")
+    return abnormal
+
 
 # Step 5: Full Process Function
 def process_xls(file_path):

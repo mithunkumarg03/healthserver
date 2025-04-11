@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import os
 from health_model import process_xls
+import traceback
 
 app = Flask(__name__)
 
@@ -37,9 +38,12 @@ def predict():
     file.save(filepath)
 
     try:
+        print("✅ File saved:", filepath)
         result = process_xls(filepath)
-        result = make_serializable(result)  # 🔧 Ensure it's JSON serializable
+        result = make_serializable(result)
     except Exception as e:
+        print("🔥 Exception occurred:")
+        traceback.print_exc()  # ⬅️ Print full stack trace to terminal
         return jsonify({"error": str(e)}), 500
     finally:
         if os.path.exists(filepath):
