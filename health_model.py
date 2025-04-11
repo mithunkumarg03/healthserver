@@ -1,32 +1,46 @@
 import pandas as pd
 import numpy as np
 import cirq
+import torch
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-
-
+# Load lightweight LLM model (FLAN-T5 Small)
+tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-small")
+model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-small")
 
 # Step 1: Classify heart disease risk
 def classify_heart_disease(row):
     risk_factors = []
+    values = {}
     if row['heart rate'] > 100:
         risk_factors.append("Heart Rate")
+        values['Heart Rate'] = row['heart rate']
     if row['blood pressure'] > 140:
         risk_factors.append("Blood Pressure")
+        values['Blood Pressure'] = row['blood pressure']
     if row['stress level'] > 6:
         risk_factors.append("Stress Level")
+        values['Stress Level'] = row['stress level']
     if risk_factors:
-        return "High Risk", risk_factors
+        return "High Risk", risk_factors, values
     else:
-        return "Low Risk", []
+        return "Low Risk", [], values
 
-
-# Step 2: Generate health report using LLM
-def generate_report(risk_factors):
+# Step 2: Generate detailed medical report using LLM
+def generate_report(risk_factors, values):
     if not risk_factors:
-        return "The patient is at low risk of heart disease. Maintain a healthy lifestyle."
-    else:
-        reasons = ', '.join(risk_factors)
-        return f"The patient is at high risk of heart disease due to {reasons}. Immediate medical attention is advised."
+        return "The patient shows stable vitals with no major risk factors detected. It is advised to continue a healthy lifestyle with regular checkups."
+
+    prompt = f"""Generate a detailed medical report in paragraph format for a patient with high risk of heart disease due to the following:
+    Risk Factors: {', '.join(risk_factors)}.
+    Corresponding Values: {', '.join([f"{k} = {v}" for k, v in values.items()])}.
+    Include possible diseases and medical recommendations. Use formal medical tone."""
+
+    inputs = tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True)
+    outputs = model.generate(**inputs, max_new_tokens=250)
+    report = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return report
+
 # Step 3: Quantum Optimization Simulation (Cirq)
 def simulate_quantum_decision():
     qubits = [cirq.LineQubit(i) for i in range(3)]
@@ -62,20 +76,19 @@ def process_xls(file_path):
 
     row = df.iloc[0]  # Only first record
 
-    # Adjust keys to match lowercased column names
-    status, risk_factors = classify_heart_disease({
-        'heart rate': row['heart rate'],
-        'blood pressure': row['blood pressure'],
-        'stress level': row['stress level']
-    })
+    # Perform risk classification
+    status, risk_factors, values = classify_heart_disease(row)
     
-    report = generate_report(risk_factors)
+    # Generate detailed report
+    report = generate_report(risk_factors, values)
+    
+    # Quantum Simulation
     quantum_info = simulate_quantum_decision()
 
     return {
         "risk": status,
         "risk_factors": risk_factors,
         "report": report,
-        "quantum": quantum_info
+        "quantum": quantum_info,
+        "values": values
     }
-
