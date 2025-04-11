@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import os
 from health_model import process_xls
+import numpy as np 
 import traceback
 
 app = Flask(__name__)
