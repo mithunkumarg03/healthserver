@@ -42,10 +42,9 @@ Include:
 Use a professional, medical tone. Write at least 3 paragraphs.
 """
 
-    api_url = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct"
-    headers = {
-        "Authorization": "Bearer YOUR_HUGGINGFACE_API_TOKEN",  # Replace with your token
-        "Content-Type": "application/json"
+    api_url = "https://api-inference.huggingface.co/models/tiiuae/falcon-rw-1b"
+    headers = {  
+        "Accept": "application/json"
     }
 
     payload = {
