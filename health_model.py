@@ -42,7 +42,7 @@ Include:
 Use a professional, medical tone. Write at least 3 paragraphs.
 """
 
-    api_url = "https://api-inference.huggingface.co/models/tiiuae/falcon-rw-1b"
+    api_url = "https://api-inference.huggingface.co/models/google/flan-t5-base"
     headers = {  
         "Accept": "application/json"
     }
