@@ -110,15 +110,31 @@ def simulate_quantum_decision():
 
 # Step 4: Create Risk Table in HTML format
 def create_risk_table(all_values):
-    if not all_values:
-        return "<p>No health data provided.</p>"
+    expected_params = {
+        "Heart Rate": all_values.get("Heart Rate", "N/A"),
+        "Blood Pressure": all_values.get("Blood Pressure", "N/A"),
+        "Stress Level": all_values.get("Stress Level", "N/A")
+    }
     
     table = "<table border='1' style='border-collapse:collapse; padding:8px;'>"
     table += "<tr><th>Parameter</th><th>Value</th><th>Status</th></tr>"
     
-    for k, v in all_values.items():
-        status = "Abnormal" if k in detect_abnormal_keys(all_values) else "Normal"
-        color = "red" if status == "Abnormal" else "green"
+    for k, v in expected_params.items():
+        if v == "N/A":
+            status = "Not Provided"
+            color = "gray"
+        else:
+            if k == "Heart Rate":
+                abnormal = v > 100
+            elif k == "Blood Pressure":
+                abnormal = v > 140
+            elif k == "Stress Level":
+                abnormal = v > 6
+            else:
+                abnormal = False
+            status = "Abnormal" if abnormal else "Normal"
+            color = "red" if abnormal else "green"
+        
         table += f"<tr><td>{k}</td><td>{v}</td><td style='color:{color};'>{status}</td></tr>"
     
     table += "</table>"
