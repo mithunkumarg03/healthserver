@@ -1,11 +1,16 @@
 from flask import Flask, request, jsonify
 import os
-import numpy as np
 from health_model import process_xls
 
 app = Flask(__name__)
+
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/')
+def home():
+    return "Welcome to Quantum Health Server!"
 
 def make_serializable(obj):
     if isinstance(obj, (np.integer, np.int64, np.int32)):
