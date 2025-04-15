@@ -2,6 +2,7 @@ import google.generativeai as genai
 import pandas as pd
 import cirq
 import requests
+import os
 
 # Step 1: Classify heart disease risk
 def classify_heart_disease(row):
