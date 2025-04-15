@@ -26,6 +26,8 @@ def classify_heart_disease(row):
     else:
         return "Low Risk", [], values
 
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
 
 # Step 2: Generate detailed medical report using Hugging Face API
 def generate_report(risk_factors, values):
@@ -43,58 +45,29 @@ def generate_report(risk_factors, values):
             "- Schedule annual checkups\n"
             "- Maintain low stress levels through relaxation techniques\n"
         )
+    # Construct prompt for Gemini
+    prompt = f"""
+    You are a medical assistant AI.
+    The patient shows the following abnormal vital signs:
+    Risk Factors: {', '.join(risk_factors)}
+    Measured Values: {', '.join([f"{k} = {v}" for k, v in values.items()])}
+    
+    Generate a detailed medical report in paragraph format that includes:
+    - Explanation of abnormal values
+    - Possible underlying conditions
+    - Related diseases
+    - Suggested clinical tests
+    - Final recommendation
 
-    report = (
-        "🔴 **High Risk Medical Report**\n"
-        "----------------------------------------\n"
-        "The patient exhibits abnormal clinical metrics indicative of elevated cardiovascular risk.\n\n"
-    )
+    Use a formal tone and structure the report with medical insights. Format the text as if it's written by a doctor.
+    """
 
-    if "Heart Rate" in risk_factors:
-        hr = values["Heart Rate"]
-        report += (
-            f"🫀Heart Rate Alert\n"
-            f"- Recorded Value: {hr} bpm\n"
-            "- Interpretation: Tachycardia (elevated heart rate)\n"
-            "- Possible Causes: Stress, arrhythmia, dehydration, thyroid issues\n"
-            "- Risks: Atrial fibrillation, cardiomyopathy, sudden cardiac arrest\n"
-            "- Suggested Tests: ECG, Holter monitor, thyroid panel, echo\n\n"
-        )
-
-    if "Blood Pressure" in risk_factors:
-        bp = values["Blood Pressure"]
-        report += (
-            f"🩸Blood Pressure Alert\n"
-            f"- Recorded Value: {bp} mmHg\n"
-            "- Interpretation: Stage 2 Hypertension\n"
-            "- Risks: Stroke, heart attack, kidney damage, vision loss\n"
-            "- Suggested Tests: Renal function, lipid profile, fundus exam\n"
-            "- Management: Low-sodium diet, exercise, antihypertensives\n\n"
-        )
-
-    if "Stress Level" in risk_factors:
-        stress = values["Stress Level"]
-        report += (
-            f"😥Stress Level Alert\n"
-            f"- Recorded Value: {stress}/10\n"
-            "- Interpretation: Elevated psychological stress\n"
-            "- Effects: Elevated heart rate, hypertension, sleep disorders\n"
-            "- Risks: Anxiety, heart strain, metabolic issues, cardiac events\n"
-            "- Management: CBT, breathing exercises, mental health therapy\n\n"
-        )
-
-    report += (
-        "----------------------------------------\n"
-        "🧾Final Recommendation\n"
-        "- Immediate follow-up with a cardiologist and mental health professional\n"
-        "- Monitor vitals regularly\n"
-        "- Adopt cardiac-friendly lifestyle habits\n"
-        "- Begin medical intervention as per specialist guidance\n"
-    )
-
-    return report
-
-
+    try:
+        model = genai.GenerativeModel(model_name="gemini-2.0-flash")
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        return f"⚠️ Error generating report: {str(e)}"
 
 
 # Step 3: Quantum Optimization Simulation (Cirq)
