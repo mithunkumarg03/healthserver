@@ -144,11 +144,13 @@ def process_xls(file_path):
     report = generate_report(risk_factors, values)
     quantum_info = simulate_quantum_decision()
     risk_table = create_risk_table(values)
+    abnormal_factors={k: v for k, v in values.item() if k in risk_factors}
 
     return {
         "risk": status,
         "risk_factors": risk_factors,
         "values": values,
+        "abnormal_factors": abnormal_factors,
         "report": report,
         "risk_table": risk_table,
         "quantum": quantum_info
