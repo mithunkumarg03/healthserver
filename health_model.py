@@ -1,26 +1,26 @@
 import google.generativeai as genai
 import pandas as pd
 import cirq
-import requests
+import numpy as np
 import os
+from sympy import Symbol
 
 # Step 1: Classify heart disease risk
 def classify_heart_disease(row):
-    risk_factors = []
-
-    # Always collect all relevant values
+    # Convert values to numeric for safety
     values = {
-        "Heart Rate": row.get('heart rate', "N/A"),
-        "Blood Pressure": row.get('blood pressure', "N/A"),
-        "Stress Level": row.get('stress level', "N/A")
+        "Heart Rate": pd.to_numeric(row.get('heart rate', "N/A"), errors='coerce'),
+        "Blood Pressure": pd.to_numeric(row.get('blood pressure', "N/A"), errors='coerce'),
+        "Stress Level": pd.to_numeric(row.get('stress level', "N/A"), errors='coerce')
     }
 
-    # Check for abnormalities
-    if isinstance(values["Heart Rate"], (int, float)) and values["Heart Rate"] > 100:
+    risk_factors = []
+
+    if values["Heart Rate"] > 100:
         risk_factors.append("Heart Rate")
-    if isinstance(values["Blood Pressure"], (int, float)) and values["Blood Pressure"] > 140:
+    if values["Blood Pressure"] > 140:
         risk_factors.append("Blood Pressure")
-    if isinstance(values["Stress Level"], (int, float)) and values["Stress Level"] > 6:
+    if values["Stress Level"] > 6:
         risk_factors.append("Stress Level")
 
     if risk_factors:
@@ -30,30 +30,29 @@ def classify_heart_disease(row):
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-
-# Step 2: Generate detailed medical report using Hugging Face API
+# Step 2: Generate detailed medical report using Gemini
 def generate_report(risk_factors, values):
     if not risk_factors:
         return (
-            "🟢 **Low Risk Summary**\n"
+            "🟢 Low Risk Summary\n"
             "----------------------------------------\n"
             "✅ The patient's biometric indicators are within acceptable ranges.\n\n"
-            "**Observations:**\n"
+            "Observations:\n"
             "- Normal heart rate\n"
             "- Normal blood pressure\n"
             "- Normal stress level\n\n"
-            "**Recommendation:**\n"
+            "Recommendation:\n"
             "- Continue regular exercise and heart-healthy diet\n"
             "- Schedule annual checkups\n"
             "- Maintain low stress levels through relaxation techniques\n"
         )
-    # Construct prompt for Gemini
+
     prompt = f"""
     You are a medical assistant AI.
     The patient shows the following abnormal vital signs:
     Risk Factors: {', '.join(risk_factors)}
     Measured Values: {', '.join([f"{k} = {v}" for k, v in values.items()])}
-    
+
     Generate a detailed medical report in paragraph format that includes:
     - Explanation of abnormal values
     - Possible underlying conditions
@@ -69,40 +68,57 @@ def generate_report(risk_factors, values):
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
-        return f"⚠️ Error generating report: {str(e)}"
+        return f"⚠ Error generating report: {str(e)}"
 
-
-# Step 3: Quantum Optimization Simulation (Cirq)
-def simulate_quantum_decision():
-    qubits = [cirq.LineQubit(i) for i in range(3)]
+# Step 3: Quantum Optimization with QAOA-style logic
+def quantum_optimize_health_risk():
+    qubits = [cirq.GridQubit(0, i) for i in range(3)]
+    gamma = Symbol('gamma')
+    beta = Symbol('beta')
     circuit = cirq.Circuit()
-    circuit.append([cirq.H(q) for q in qubits])
+
+    # Initial state
+    circuit += [cirq.H(q) for q in qubits]
+
+    # Cost layer
     for q in qubits:
-        circuit.append(cirq.Z(q) ** 0.5)
-        circuit.append(cirq.X(q) ** 0.3)
-    circuit.append(cirq.measure(*qubits, key='result'))
+        circuit += cirq.ZPowGate(exponent=gamma / np.pi)(q)
+
+    # Mixer layer
+    for q in qubits:
+        circuit += cirq.rx(2 * beta)(q)
+
+    circuit += cirq.measure(*qubits, key='result')
+    resolver = cirq.ParamResolver({'gamma': np.pi / 2, 'beta': np.pi / 4})
     simulator = cirq.Simulator()
-    result = simulator.run(circuit, repetitions=100)
+    result = simulator.run(circuit, resolver, repetitions=100)
     histogram = result.histogram(key='result')
-    most_common = max(histogram, key=histogram.get)
+    best_state = min(histogram.items(), key=lambda x: bin(x[0]).count("1"))
+    binary_state = format(best_state[0], "03b")
+
+    factors = ["Heart Rate", "Blood Pressure", "Stress Level"]
+    report = {f: ("High" if binary_state[i] == '1' else "Normal") for i, f in enumerate(factors)}
+
     return {
-        "quantum_result": format(most_common, '03b'),
-        "explanation": "Quantum simulation completed. Used to explore risk decision landscape."
+        "quantum_state": binary_state,
+        "optimized_risk_factors": [f for f, s in report.items() if s == "High"],
+        "optimization_report": report,
+        "quantum_message": "QAOA-inspired optimization simulated successfully."
     }
 
-# Step 4: Create Risk Table in HTML format
+# Step 4: Create Risk Table
 def create_risk_table(all_values):
     expected_params = {
         "Heart Rate": all_values.get("Heart Rate", "N/A"),
         "Blood Pressure": all_values.get("Blood Pressure", "N/A"),
         "Stress Level": all_values.get("Stress Level", "N/A")
     }
-    
+
     table = "<table border='1' style='border-collapse:collapse; padding:8px;'>"
     table += "<tr><th>Parameter</th><th>Value</th><th>Status</th></tr>"
-    
+
     for k, v in expected_params.items():
-        if v == "N/A":
+        if pd.isna(v):
             status = "Not Provided"
             color = "gray"
         else:
@@ -116,24 +132,13 @@ def create_risk_table(all_values):
                 abnormal = False
             status = "Abnormal" if abnormal else "Normal"
             color = "red" if abnormal else "green"
-        
+
         table += f"<tr><td>{k}</td><td>{v}</td><td style='color:{color};'>{status}</td></tr>"
-    
+
     table += "</table>"
     return table
 
-def detect_abnormal_keys(values):
-    abnormal = []
-    if "Heart Rate" in values and values["Heart Rate"] > 100:
-        abnormal.append("Heart Rate")
-    if "Blood Pressure" in values and values["Blood Pressure"] > 140:
-        abnormal.append("Blood Pressure")
-    if "Stress Level" in values and values["Stress Level"] > 6:
-        abnormal.append("Stress Level")
-    return abnormal
-
-
-# Step 5: Full Process Function
+# Step 5: Full pipeline
 def process_xls(file_path):
     df = pd.read_excel(file_path)
     df.columns = df.columns.str.strip().str.lower()
@@ -142,9 +147,9 @@ def process_xls(file_path):
 
     status, risk_factors, values = classify_heart_disease(row)
     report = generate_report(risk_factors, values)
-    quantum_info = simulate_quantum_decision()
+    quantum_info = quantum_optimize_health_risk()
     risk_table = create_risk_table(values)
-    abnormal_factors={k: v for k, v in values.items() if k in risk_factors}
+    abnormal_factors = {k: v for k, v in values.items() if k in risk_factors}
 
     return {
         "risk": status,
@@ -155,4 +160,3 @@ def process_xls(file_path):
         "risk_table": risk_table,
         "quantum": quantum_info
     }
-
