@@ -138,25 +138,54 @@ def create_risk_table(all_values):
     table += "</table>"
     return table
 
-# Step 5: Full pipeline
 def process_xls(file_path):
     df = pd.read_excel(file_path)
     df.columns = df.columns.str.strip().str.lower()
     df = df.drop(columns=['patient id'], errors='ignore')
-    row = df.iloc[0]
 
-    status, risk_factors, values = classify_heart_disease(row)
-    report = generate_report(risk_factors, values)
-    quantum_info = quantum_optimize_health_risk()
-    risk_table = create_risk_table(values)
-    abnormal_factors = {k: v for k, v in values.items() if k in risk_factors}
+    results = []
+
+    for index, row in df.iterrows():
+        row_dict = row.to_dict()
+        timestamp = str(row_dict.get("timestamp", f"Row {index + 1}")).strip()
+
+        # Filter only health-related numeric values
+        health_data = {k.title(): pd.to_numeric(v, errors='coerce') 
+                       for k, v in row_dict.items() if k != "timestamp"}
+
+        # Step 1: Basic rule-based classification (optional customization)
+        risk_factors = []
+        for k, v in health_data.items():
+            if pd.isna(v): continue
+            if ("heart" in k.lower() and v > 100) or \
+               ("pressure" in k.lower() and v > 140) or \
+               ("stress" in k.lower() and v > 6):
+                risk_factors.append(k)
+
+        risk_status = "High Risk" if risk_factors else "Low Risk"
+
+        # Step 2: LLM medical report
+        report = generate_report(risk_factors, health_data)
+
+        # Step 3: Quantum optimization simulation (still 3 factors for now)
+        quantum_info = quantum_optimize_health_risk()
+
+        # Step 4: Risk summary table (just for original 3 parameters)
+        risk_table = create_risk_table(health_data)
+
+        results.append({
+            "timestamp": timestamp,
+            "risk": risk_status,
+            "risk_factors": risk_factors,
+            "values": health_data,
+            "abnormal_factors": {k: v for k, v in health_data.items() if k in risk_factors},
+            "report": report,
+            "risk_table": risk_table,
+            "quantum": quantum_info
+        })
 
     return {
-        "risk": status,
-        "risk_factors": risk_factors,
-        "values": values,
-        "abnormal_factors": abnormal_factors,
-        "report": report,
-        "risk_table": risk_table,
-        "quantum": quantum_info
+        "status": "success",
+        "num_records": len(results),
+        "records": results
     }
